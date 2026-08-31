@@ -93,6 +93,42 @@
             font-weight: 600;
         }
 
+        /* ===== ПОДСКАЗКА ДЛЯ ТЕЛЕФОНА ===== */
+        .hint {
+            display: none;
+            background: #f4ede4;
+            border-radius: 16px;
+            padding: 15px 20px;
+            margin: 15px 0 10px;
+            border-left: 4px solid #b48a62;
+            font-size: 0.95rem;
+            color: #4a3520;
+            text-align: center;
+        }
+
+        .hint .close-hint {
+            display: inline-block;
+            margin-top: 8px;
+            background: #b48a62;
+            color: white;
+            border: none;
+            padding: 4px 18px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .hint .close-hint:hover {
+            background: #9a704a;
+        }
+
+        @media (max-width: 700px) {
+            .hint {
+                display: block;
+            }
+        }
+
         /* ===== ИГРОВОЕ ПОЛЕ ===== */
         .game-stats {
             display: flex;
@@ -191,11 +227,22 @@
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-10px); }
-            40% { transform: translateX(10px); }
-            60% { transform: translateX(-5px); }
-            80% { transform: translateX(5px); }
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-10px);
+            }
+            40% {
+                transform: translateX(10px);
+            }
+            60% {
+                transform: translateX(-5px);
+            }
+            80% {
+                transform: translateX(5px);
+            }
         }
 
         .card .card-sub {
@@ -295,12 +342,32 @@
         }
 
         @media (max-width: 700px) {
-            .app-container { padding: 20px 15px; }
-            .header h1 { font-size: 1.8rem; }
-            .game-board { flex-direction: column; gap: 15px; }
-            .card { font-size: 0.85rem; padding: 10px 8px; min-height: 55px; }
-            .game-stats { font-size: 0.9rem; padding: 8px 12px; flex-wrap: wrap; gap: 5px; }
-            button { padding: 12px 20px; font-size: 1rem; max-width: 100%; }
+            .app-container {
+                padding: 20px 15px;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .game-board {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .card {
+                font-size: 0.85rem;
+                padding: 10px 8px;
+                min-height: 55px;
+            }
+            .game-stats {
+                font-size: 0.9rem;
+                padding: 8px 12px;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            button {
+                padding: 12px 20px;
+                font-size: 1rem;
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -318,10 +385,17 @@
         <!-- ЭКРАН 1: ВСТУПЛЕНИЕ -->
         <div id="screen1" class="screen active">
             <div class="intro-text">
-                Бог действовал через обычных людей, которые доверились Ему.<br><br>
+                Бог действовал через обычные людей, которые доверились Ему.<br><br>
                 <span class="highlight">Соедини героя с его подвигом</span> и вспомни, что Бог совершал через них великие дела.<br><br>
                 <span style="font-size:0.9rem; color:#7a5a3a;">Перетаскивай имя героя к его подвигу мышкой или пальцем.</span>
             </div>
+
+            <!-- ПОДСКАЗКА ДЛЯ ТЕЛЕФОНА -->
+            <div class="hint" id="hintMessage">
+                📱 Для удобства игры на телефоне переверните экран в горизонтальное положение.
+                <button class="close-hint" onclick="closeHint()">Понятно</button>
+            </div>
+
             <button onclick="startGame()">⚔️ Начать игру</button>
         </div>
 
@@ -409,6 +483,12 @@
             document.getElementById('screen2').classList.remove('active');
             document.getElementById('screen3').classList.remove('active');
             document.getElementById('screen1').classList.add('active');
+            // Сбрасываем подсказку, если она была скрыта
+            document.getElementById('hintMessage').style.display = '';
+        }
+
+        function closeHint() {
+            document.getElementById('hintMessage').style.display = 'none';
         }
 
         function renderGame() {
