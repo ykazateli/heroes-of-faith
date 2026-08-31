@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Герои веры: подвиг | Указатели</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Comic Neue', 'Comic Sans MS', sans-serif;
+            background: #fdf8e7;
+            background-image: radial-gradient(circle at 10% 20%, rgba(218, 178, 115, 0.08) 0%, rgba(0,0,0,0) 50%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 900px;
+            width: 100%;
+            background: #fff6e8;
+            border-radius: 48px;
+            box-shadow: 0 20px 35px rgba(100, 70, 30, 0.15);
+            padding: 30px 30px 40px;
+            border: 1px solid #f0dbb4;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .header .studio-link {
+            display: inline-block;
+            font-size: 1rem;
+            color: #4A90D9;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px solid #4A90D9;
+            padding-bottom: 2px;
+            transition: 0.2s;
+        }
+
+        .header .studio-link:hover {
+            color: #2c6aa0;
+            border-bottom-color: #2c6aa0;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            color: #4a3520;
+            margin-top: 8px;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+        }
+
+        .header .subtitle {
+            font-size: 1rem;
+            color: #7a5a3a;
+            font-weight: 300;
+            line-height: 1.5;
+        }
+
+        .screen {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .intro-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #3e2c1a;
+            margin: 20px 0;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid #e6dacb;
+        }
+
+        .intro-text .highlight {
+            color: #b48a62;
+            font-weight: 600;
+        }
+
+        /* ===== ИГРОВОЕ ПОЛЕ ===== */
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            background: #e9dbbc;
+            padding: 10px 20px;
+            border-radius: 60px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #5a3c1a;
+        }
+
+        .game-board {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            justify-content: center;
+            align-items: stretch;
+            margin: 20px 0;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 0;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 15px 10px;
+            border: 1px solid #e6dacb;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column h3 {
+            font-size: 1.1rem;
+            color: #4a3520;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #f0e6d8;
+            padding-bottom: 8px;
+            flex-shrink: 0;
+        }
+
+        .column .cards-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            justify-content: space-around;
+        }
+
+        .card {
+            background: #f4ede4;
+            border: 2px solid #d5c4b0;
+            border-radius: 16px;
+            padding: 12px 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #3e2c1a;
+            cursor: grab;
+            transition: 0.2s ease;
+            text-align: center;
+            min-height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            flex-shrink: 0;
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .card.dragover {
+            border-color: #b48a62;
+            background: #efe5d8;
+            transform: scale(1.02);
+        }
+
+        .card.matched {
+            background: #c8e6c9;
+            border-color: #4CAF50;
+            cursor: default;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .card.wrong {
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+
+        .card .card-sub {
+            font-size: 0.7rem;
+            color: #a58d7a;
+            font-weight: 300;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .finish-box {
+            background: #ffffff;
+            border-radius: 30px;
+            padding: 30px 25px;
+            border: 1px solid #e6dacb;
+            margin: 20px 0;
+        }
+
+        .finish-box h2 {
+            font-size: 1.8rem;
+            color: #4a3520;
+            margin-bottom: 15px;
+        }
+
+        .finish-box p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #3e2c1a;
+        }
+
+        .finish-box .final-verse {
+            font-style: italic;
+            font-size: 1.1rem;
+            color: #b48a62;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f4ede4;
+            border-radius: 16px;
+        }
+
+        button {
+            background: #b48a62;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        button:hover {
+            background: #9a704a;
+            transform: translateY(-2px);
+        }
+
+        button.secondary {
+            background: #e6dacb;
+            color: #4a3520;
+        }
+
+        button.secondary:hover {
+            background: #d5c4b0;
+        }
+
+        .footer {
+            margin-top: 30px;
+            border-top: 1px solid #e6dacb;
+            padding-top: 20px;
+            text-align: center;
+        }
+
+        .footer .studio-link {
+            color: #4A90D9;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #4A90D9;
+            padding-bottom: 2px;
+            transition: 0.2s;
+        }
+
+        .footer .studio-link:hover {
+            color: #2c6aa0;
+            border-bottom-color: #2c6aa0;
+        }
+
+        .footer .small-note {
+            display: block;
+            margin-top: 6px;
+            color: #a58d7a;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 700px) {
+            .app-container { padding: 20px 15px; }
+            .header h1 { font-size: 1.8rem; }
+            .game-board { flex-direction: column; gap: 15px; }
+            .card { font-size: 0.85rem; padding: 10px 8px; min-height: 55px; }
+            .game-stats { font-size: 0.9rem; padding: 8px 12px; flex-wrap: wrap; gap: 5px; }
+            button { padding: 12px 20px; font-size: 1rem; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- ШАПКА -->
+        <div class="header">
+            <a href="https://vk.com/ykazateli_of_christ" target="_blank" class="studio-link">
+                🕯️ Библейская студия анимации «Указатели»
+            </a>
+            <h1>🦁 Герои веры: подвиг</h1>
+            <p class="subtitle">Соедини героя с его подвигом</p>
+        </div>
+
+        <!-- ЭКРАН 1: ВСТУПЛЕНИЕ -->
+        <div id="screen1" class="screen active">
+            <div class="intro-text">
+                Бог действовал через обычных людей, которые доверились Ему.<br><br>
+                <span class="highlight">Соедини героя с его подвигом</span> и вспомни, что Бог совершал через них великие дела.<br><br>
+                <span style="font-size:0.9rem; color:#7a5a3a;">Перетаскивай имя героя к его подвигу мышкой или пальцем.</span>
+            </div>
+            <button onclick="startGame()">⚔️ Начать игру</button>
+        </div>
+
+        <!-- ЭКРАН 2: ИГРА -->
+        <div id="screen2" class="screen">
+            <div class="game-stats">
+                <span>👥 Найдено: <span id="matchCount">0</span> из <span id="totalPairs">8</span></span>
+                <span>🔄 Попыток: <span id="attempts">0</span></span>
+            </div>
+            <div class="game-board" id="gameBoard">
+                <!-- Колонка с героями -->
+                <div class="column" id="heroesColumn">
+                    <h3>🛡️ Герои</h3>
+                    <div class="cards-container" id="heroesList"></div>
+                </div>
+                <!-- Колонка с подвигами -->
+                <div class="column" id="deedsColumn">
+                    <h3>⚡ Подвиги</h3>
+                    <div class="cards-container" id="deedsList"></div>
+                </div>
+            </div>
+            <button class="secondary" onclick="resetGame()" style="display: none;" id="resetBtn">🔄 Играть снова</button>
+        </div>
+
+        <!-- ЭКРАН 3: ФИНИШ -->
+        <div id="screen3" class="screen">
+            <div class="finish-box">
+                <h2>🏆 Все пары найдены!</h2>
+                <p>
+                    Ты соединил всех героев с их подвигами.
+                    Вера этих людей изменила историю.
+                </p>
+                <div class="final-verse">
+                    «И что ещё скажу? Недостанет мне времени, чтобы повествовать о Гедеоне, о Вараке, о Самсоне и Иеффае, о Давиде, Самуиле и других пророках, которые верою побеждали царства, творили правду, получали обетования, заграждали уста львов»<br>
+                    <span style="font-style: normal; font-weight: 600; color: #4a3520;">— Евреям 11:32-33</span>
+                </div>
+                <button onclick="resetGame()">🔄 Играть снова</button>
+            </div>
+        </div>
+
+        <!-- ФУТЕР -->
+        <div class="footer">
+            <a href="https://vk.com/ykazateli_of_christ" target="_blank" class="studio-link">
+                🕯️ Изучайте Библию вместе с «Указателями»
+            </a>
+            <span class="small-note">Герои веры — пример для нас</span>
+        </div>
+    </div>
+
+    <script>
+        // ============ ДАННЫЕ ============
+        const pairsData = [
+            { hero: "Ной", deed: "Построил ковчег и спас свою семью от потопа" },
+            { hero: "Авраам", deed: "Поверил Богу и пошёл в неизвестную землю" },
+            { hero: "Моисей", deed: "Вывел народ из Египта через Чермное море" },
+            { hero: "Давид", deed: "Победил великана Голиафа камнем из пращи" },
+            { hero: "Самсон", deed: "Разрушил храм филистимлян ценой жизни" },
+            { hero: "Гедеон", deed: "С 300 воинами победил огромное войско" },
+            { hero: "Варак", deed: "С Деворой разбил войско Сисары" },
+            { hero: "Даниил", deed: "Был брошен в ров ко львам, но остался жив" }
+        ];
+
+        let matchedIndices = [];
+        let attempts = 0;
+        let draggedHeroId = null;
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startGame() {
+            document.getElementById('screen1').classList.remove('active');
+            document.getElementById('screen2').classList.add('active');
+            document.getElementById('screen3').classList.remove('active');
+            matchedIndices = [];
+            attempts = 0;
+            renderGame();
+        }
+
+        function resetGame() {
+            document.getElementById('screen2').classList.remove('active');
+            document.getElementById('screen3').classList.remove('active');
+            document.getElementById('screen1').classList.add('active');
+        }
+
+        function renderGame() {
+            const heroesList = document.getElementById('heroesList');
+            const deedsList = document.getElementById('deedsList');
+            heroesList.innerHTML = '';
+            deedsList.innerHTML = '';
+
+            const shuffledHeroes = shuffle([...pairsData]);
+            const shuffledDeeds = shuffle([...pairsData]);
+
+            shuffledHeroes.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.draggable = true;
+                card.dataset.heroId = pairsData.indexOf(item);
+                card.textContent = item.hero;
+
+                if (matchedIndices.includes(pairsData.indexOf(item))) {
+                    card.classList.add('matched');
+                    card.draggable = false;
+                }
+
+                card.addEventListener('dragstart', onDragStart);
+                card.addEventListener('dragend', onDragEnd);
+                card.addEventListener('touchstart', onTouchStart, { passive: true });
+                card.addEventListener('touchmove', onTouchMove, { passive: false });
+                card.addEventListener('touchend', onTouchEnd, { passive: true });
+
+                heroesList.appendChild(card);
+            });
+
+            shuffledDeeds.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.deedId = pairsData.indexOf(item);
+                card.textContent = item.deed;
+
+                if (matchedIndices.includes(pairsData.indexOf(item))) {
+                    card.classList.add('matched');
+                }
+
+                card.addEventListener('dragover', onDragOver);
+                card.addEventListener('dragenter', onDragEnter);
+                card.addEventListener('dragleave', onDragLeave);
+                card.addEventListener('drop', onDrop);
+
+                deedsList.appendChild(card);
+            });
+
+            document.getElementById('matchCount').textContent = matchedIndices.length;
+            document.getElementById('totalPairs').textContent = pairsData.length;
+            document.getElementById('attempts').textContent = attempts;
+
+            if (matchedIndices.length === pairsData.length) {
+                document.getElementById('resetBtn').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('screen2').classList.remove('active');
+                    document.getElementById('screen3').classList.add('active');
+                }, 500);
+            } else {
+                document.getElementById('resetBtn').style.display = 'none';
+            }
+        }
+
+        // ============ DRAG & DROP ============
+        function onDragStart(e) {
+            if (this.classList.contains('matched')) return;
+            draggedHeroId = parseInt(this.dataset.heroId);
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', draggedHeroId);
+        }
+
+        function onDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.card.dragover').forEach(el => el.classList.remove('dragover'));
+        }
+
+        function onDragOver(e) {
+            e.preventDefault();
+            if (this.classList.contains('matched')) return;
+            this.classList.add('dragover');
+        }
+
+        function onDragEnter(e) {
+            e.preventDefault();
+            if (this.classList.contains('matched')) return;
+            this.classList.add('dragover');
+        }
+
+        function onDragLeave(e) {
+            this.classList.remove('dragover');
+        }
+
+        function onDrop(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            if (this.classList.contains('matched')) return;
+
+            const heroId = parseInt(e.dataTransfer.getData('text/plain'));
+            const deedId = parseInt(this.dataset.deedId);
+            attempts++;
+            document.getElementById('attempts').textContent = attempts;
+
+            if (heroId === deedId && !matchedIndices.includes(heroId)) {
+                matchedIndices.push(heroId);
+                renderGame();
+            } else {
+                this.classList.add('wrong');
+                setTimeout(() => this.classList.remove('wrong'), 400);
+                const heroCard = document.querySelector(`#heroesList .card[data-hero-id="${heroId}"]`);
+                if (heroCard) {
+                    heroCard.classList.add('wrong');
+                    setTimeout(() => heroCard.classList.remove('wrong'), 400);
+                }
+            }
+        }
+
+        // ============ TOUCH ============
+        let touchStartX, touchStartY;
+        let touchElement = null;
+        let touchHeroId = null;
+        let touchGhost = null;
+
+        function onTouchStart(e) {
+            if (this.classList.contains('matched')) return;
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchElement = this;
+            touchHeroId = parseInt(this.dataset.heroId);
+        }
+
+        function onTouchMove(e) {
+            if (!touchElement) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = touchElement.getBoundingClientRect();
+
+            if (!touchGhost) {
+                touchGhost = touchElement.cloneNode(true);
+                touchGhost.style.position = 'fixed';
+                touchGhost.style.width = rect.width + 'px';
+                touchGhost.style.opacity = '0.8';
+                touchGhost.style.pointerEvents = 'none';
+                touchGhost.style.zIndex = '1000';
+                touchGhost.style.border = '2px solid #b48a62';
+                document.body.appendChild(touchGhost);
+                touchElement.style.opacity = '0.5';
+            }
+
+            touchGhost.style.left = (touch.clientX - rect.width / 2) + 'px';
+            touchGhost.style.top = (touch.clientY - rect.height / 2) + 'px';
+
+            document.querySelectorAll('#deedsList .card:not(.matched)').forEach(card => {
+                const r = card.getBoundingClientRect();
+                if (touch.clientX >= r.left && touch.clientX <= r.right &&
+                    touch.clientY >= r.top && touch.clientY <= r.bottom) {
+                    card.classList.add('dragover');
+                } else {
+                    card.classList.remove('dragover');
+                }
+            });
+        }
+
+        function onTouchEnd(e) {
+            if (!touchElement) return;
+            const touch = e.changedTouches[0];
+
+            let target = null;
+            document.querySelectorAll('#deedsList .card:not(.matched)').forEach(card => {
+                const r = card.getBoundingClientRect();
+                if (touch.clientX >= r.left && touch.clientX <= r.right &&
+                    touch.clientY >= r.top && touch.clientY <= r.bottom) {
+                    target = card;
+                }
+                card.classList.remove('dragover');
+            });
+
+            if (touchGhost) {
+                touchGhost.remove();
+                touchGhost = null;
+            }
+            touchElement.style.opacity = '1';
+
+            if (target) {
+                const deedId = parseInt(target.dataset.deedId);
+                attempts++;
+                document.getElementById('attempts').textContent = attempts;
+
+                if (touchHeroId === deedId && !matchedIndices.includes(touchHeroId)) {
+                    matchedIndices.push(touchHeroId);
+                    renderGame();
+                } else {
+                    target.classList.add('wrong');
+                    setTimeout(() => target.classList.remove('wrong'), 400);
+                    touchElement.classList.add('wrong');
+                    setTimeout(() => touchElement.classList.remove('wrong'), 400);
+                }
+            }
+
+            touchElement = null;
+            touchHeroId = null;
+        }
+    </script>
+</body>
+</html>
